@@ -1,14 +1,16 @@
 ## comp-data
 
-Datasets for testing lossless compression
+Collection of common datasets for testing lossless compression
 
 ### Datasets
 * [Artificial](https://corpus.canterbury.ac.nz/descriptions/#artificl)
 * [Calgary](https://corpus.canterbury.ac.nz/descriptions/#calgary)
 * [Canterbury](https://corpus.canterbury.ac.nz/descriptions/#cantrbry)
 * [Large](https://corpus.canterbury.ac.nz/descriptions/#large)
+* [Miscellaneous](https://corpus.canterbury.ac.nz/descriptions/#misc)
 * [Neuro](https://github.com/neurolabusc/zlib-bench)
 * [Silesia](https://sun.aei.polsl.pl/~sdeor/index.php?page=silesia)
+* [Snappy](https://github.com/google/snappy)
 
 ### Merging datasets
 
