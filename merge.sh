@@ -7,7 +7,7 @@ DATASET_MERGED_DIR="$PWD"/dataset_merged
 
 print_help() {
     printf \
-"Merge datasets into a singular large files
+"Merge datasets into singular large files
 
 Usage: ./merge.sh [-a|--all] [-h|--help] [-o|--output-dir <path>] {<dataset>}
 Options:
