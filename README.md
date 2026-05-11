@@ -15,7 +15,6 @@ Collection of common datasets for testing lossless compression
 ### Merging datasets
 
 Each dataset can be merged into a single large file using this helper script:
-
 ```console
 $ ./merge.sh
 Merge datasets into singular large files
@@ -30,4 +29,22 @@ Options:
                       (default: ./dataset)
    -o|--output-dir    Directory to which merged datasets will be saved
                       (default: ./dataset_merged)
+```
+
+Examples:
+* Merge all datasets and save to `~/my_datasets`
+```console
+$ ./merge -a -o ~/my_datasets
+```
+* Merge all datasets from `~/my_datasets`
+```console
+$ ./merge -a -d ~/my_datasets
+```
+* Merge Canterbury and Calgary
+```console
+$ ./merge dataset/canterbury dataset/calgary
+```
+* Merge Silesia and save to `~/my_datasets`
+```console
+$ ./merge -o ~/my_datasets dataset/silesia
 ```
