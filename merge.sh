@@ -2,19 +2,24 @@
 
 set -euo pipefail
 
-DATASET_DIR="$PWD"/dataset
-DATASET_MERGED_DIR="$PWD"/dataset_merged
+DATASET_DIR_DEFAULT=./dataset
+OUTPUT_DIR_DEFAULT=./dataset_merged
 
 print_help() {
     printf \
 "Merge datasets into singular large files
 
-Usage: ./merge.sh [-a|--all] [-h|--help] [-o|--output-dir <path>] {<dataset>}
+Usage: ./merge.sh [-a|--all] [-h|--help]
+                  [-d|--dataset-dir <path>] [-o|--output-dir <path>]
+                  {<dataset>}
 Options:
-   -a|--all          Merge all datasets from ./dataset directory
-   -h|--help         Print this help
-   -o|--output-dir   Directory to which merged datasets will be saved
-"
+   -a|--all           Merge all datasets from --dataset-dir
+   -h|--help          Print this help
+   -d|--dataset-dir   Directory to find datasets for iterative merging
+                      (default: %s)
+   -o|--output-dir    Directory to which merged datasets will be saved
+                      (default: %s)
+" "$DATASET_DIR_DEFAULT" "$OUTPUT_DIR_DEFAULT"
 }
 
 merge_dataset() {
@@ -33,7 +38,8 @@ merge_dataset() {
     echo "Done!"
 }
 
-OUTPUT_DIR="$DATASET_MERGED_DIR"
+DATASET_DIR="$DATASET_DIR_DEFAULT"
+OUTPUT_DIR="$OUTPUT_DIR_DEFAULT"
 MERGE_ALL=0
 TARGETS=()
 
@@ -47,6 +53,11 @@ while [ "$#" -gt 0 ]; do
     -h|--help)
         print_help
         exit 0
+        ;;
+    -d|--dataset-dir)
+        DATASET_DIR="$2"
+        shift
+        shift
         ;;
     -o|--output-dir)
         OUTPUT_DIR="$2"
@@ -63,6 +74,11 @@ while [ "$#" -gt 0 ]; do
         ;;
     esac
 done
+
+if [ ! -d "$DATASET_DIR" ]; then
+    echo "Path doesn't exist: $DATASET_DIR"
+    exit 1
+fi
 
 if [ ! -d "$OUTPUT_DIR" ]; then
     echo "Path doesn't exist: $OUTPUT_DIR"
