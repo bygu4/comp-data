@@ -3,10 +3,12 @@
 Datasets for testing lossless compression
 
 ### Datasets
-* [Silesia](https://sun.aei.polsl.pl/~sdeor/index.php?page=silesia)
+* [Artificial](https://corpus.canterbury.ac.nz/descriptions/#artificl)
+* [Calgary](https://corpus.canterbury.ac.nz/descriptions/#calgary)
 * [Canterbury](https://corpus.canterbury.ac.nz/descriptions/#cantrbry)
 * [Large](https://corpus.canterbury.ac.nz/descriptions/#large)
-* [Calgary](https://corpus.canterbury.ac.nz/descriptions/#calgary)
+* [Neuro](https://github.com/neurolabusc/zlib-bench)
+* [Silesia](https://sun.aei.polsl.pl/~sdeor/index.php?page=silesia)
 
 ### Merging datasets
 
