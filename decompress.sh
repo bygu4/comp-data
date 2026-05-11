@@ -2,50 +2,52 @@
 
 set -euo pipefail
 
-DATASET_DIR_DEFAULT=./decompressed
-OUTPUT_DIR_DEFAULT=./merged
+DATASET_DIR_DEFAULT=./compressed
+OUTPUT_DIR_DEFAULT=./decompressed
 
 print_help() {
     printf \
-"Merge datasets into singular large files
+"Decompress datasets using xz utility
 
-Usage: ./merge.sh [-a|--all] [-h|--help]
-                  [-d|--dataset-dir <path>] [-o|--output-dir <path>]
-                  {<dataset>}
+Usage: ./decompress.sh [-a|--all] [-h|--help]
+                       [-d|--dataset-dir <path>] [-o|--output-dir <path>]
+                       {<dataset>}
 Options:
-   -a|--all           Merge all datasets from --dataset-dir
+   -a|--all           Decompress all datasets from --dataset-dir
    -h|--help          Print this help
-   -d|--dataset-dir   Directory to find datasets for iterative merging
+   -d|--dataset-dir   Directory to find datasets for iterative decompression
                       (default: %s)
-   -o|--output-dir    Directory to which merged datasets will be saved
+   -o|--output-dir    Directory to which decompressed datasets will be saved
                       (default: %s)
 " "$DATASET_DIR_DEFAULT" "$OUTPUT_DIR_DEFAULT"
 }
 
-merge_dataset() {
+decompress_dataset() {
     local dataset_path="$1"
     local output_dir="$2"
     local dataset_name
     dataset_name=$(basename "$dataset_path")
-    local merged_file="$output_dir"/"$dataset_name"
+    local decompressed_dir="$output_dir"/"$dataset_name"
+
+    mkdir -p "$decompressed_dir"
 
     echo "Processing $dataset_name"
-    echo "Merging files from $dataset_path into file $merged_file"
-
-    true > "$merged_file"
+    echo "Decompressing files from $dataset_path into $decompressed_dir"
 
     while IFS= read -r -d "" file; do
-        echo "$file"
+        local file_name
+        file_name=$(basename "$file")
+        local decompressed_file="$decompressed_dir"/${file_name%.*}
 
-        cat "$file" >> "$merged_file"
-    done < <(find "$dataset_path" -maxdepth 1 -type f -print0 | sort -z)
+        xz -dvcT 0 "$file" > "$decompressed_file"
+    done < <(find "$dataset_path" -maxdepth 1 -type f -print0)
 
     echo "Done!"
 }
 
 DATASET_DIR="$DATASET_DIR_DEFAULT"
 OUTPUT_DIR="$OUTPUT_DIR_DEFAULT"
-MERGE_ALL=0
+DECOMPRESS_ALL=0
 TARGETS=()
 
 if [ "$#" -eq 0 ]; then
@@ -70,7 +72,7 @@ while [ "$#" -gt 0 ]; do
         shift
         ;;
     -a|--all)
-        MERGE_ALL=1
+        DECOMPRESS_ALL=1
         shift
         ;;
     *)
@@ -90,7 +92,7 @@ if [ ! -d "$OUTPUT_DIR" ]; then
     exit 1
 fi
 
-if [ "$MERGE_ALL" -eq 1 ]; then
+if [ "$DECOMPRESS_ALL" -eq 1 ]; then
         TARGETS=()
 
         while IFS= read -r -d "" dataset; do
@@ -109,5 +111,5 @@ for dataset in "${TARGETS[@]}"; do
         exit 1
     fi
 
-    merge_dataset "$dataset" "$OUTPUT_DIR"
+    decompress_dataset "$dataset" "$OUTPUT_DIR"
 done
