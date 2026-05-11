@@ -38,7 +38,7 @@ merge_dataset() {
         echo "$file"
 
         cat "$file" >> "$merged_file"
-    done < <(find "$dataset_path" -maxdepth 1 -type f -print0 | sort -z)
+    done < <(find "$dataset_path" -maxdepth 1 -type f -print0 | sort -zfV)
 
     echo "Done!"
 }
