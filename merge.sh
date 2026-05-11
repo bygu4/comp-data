@@ -1,37 +1,92 @@
-#! /bin/sh
+#! /bin/bash
 
-set -eu
+set -euo pipefail
+
+DATASET_DIR="$PWD"/dataset
+DATASET_MERGED_DIR="$PWD"/dataset_merged
+
+print_help() {
+    printf \
+"Merge datasets into a singular large files
+
+Usage: ./merge.sh [-a|--all] [-h|--help] [-o|--output-dir <path>] {<dataset>}
+Options:
+   -a|--all          Merge all datasets from ./dataset directory
+   -h|--help         Print this help
+   -o|--output-dir   Directory to which merged datasets will be saved
+"
+}
 
 merge_dataset() {
-    DATASET_PATH="$1"
-    DATASET_NAME=$(basename "$DATASET_PATH")
+    local dataset_path="$1"
+    local output_dir="$2"
+    local dataset_name
+    dataset_name=$(basename "$dataset_path")
+    local output_file="$output_dir"/"$dataset_name"
 
-    DIR_FILES=$(echo "$DATASET_PATH"/files | tr -s "/")
-    DIR_MERGED=$(echo "$DATASET_PATH"/merged | tr -s "/")
+    echo "Processing $dataset_name"
+    echo "Merging files from $dataset_path into file $output_file"
 
-    MERGED_DATASET_PATH=$(echo "$DIR_MERGED"/"$DATASET_NAME" | tr -s "/")
-
-    echo "Processing $DATASET_NAME"
-    echo "Merging files from $DIR_FILES into file $MERGED_DATASET_PATH"
-
-    find "$DIR_FILES" -maxdepth 1 -type f -print0 | sort -z | xargs -0 cat \
-        > "$MERGED_DATASET_PATH"
+    find "$dataset_path" -maxdepth 1 -type f -print0 | sort -z | xargs -0 cat \
+        > "$output_file"
 
     echo "Done!"
 }
 
-while [ $# -gt 0 ]; do
-    case $1 in
-    -a|--all)
-        find . -maxdepth 1 -type d -not -name ".*" -print \
-                | while IFS= read -r dataset; do
-            merge_dataset "$dataset"
-        done
+OUTPUT_DIR="$DATASET_MERGED_DIR"
+MERGE_ALL=0
+TARGETS=()
+
+if [ "$#" -eq 0 ]; then
+    print_help
+    exit 1
+fi
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+    -h|--help)
+        print_help
         exit 0
         ;;
+    -o|--output-dir)
+        OUTPUT_DIR="$2"
+        shift
+        shift
+        ;;
+    -a|--all)
+        MERGE_ALL=1
+        shift
+        ;;
     *)
-        merge_dataset "$1"
+        TARGETS+=("$1")
         shift
         ;;
     esac
+done
+
+if [ ! -d "$OUTPUT_DIR" ]; then
+    echo "Path doesn't exist: $OUTPUT_DIR"
+    exit 1
+fi
+
+if [ "$MERGE_ALL" -eq 1 ]; then
+        TARGETS=()
+
+        while IFS= read -r -d "" dataset; do
+            TARGETS+=("$dataset")
+        done < <(find "$DATASET_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+fi
+
+if [ "${#TARGETS[@]}" -eq 0 ]; then
+    echo "No targets specified"
+    exit 1
+fi
+
+for dataset in "${TARGETS[@]}"; do
+    if [ ! -d "$dataset" ]; then
+        echo "Path doesn't exist: $dataset"
+        exit 1
+    fi
+
+    merge_dataset "$dataset" "$OUTPUT_DIR"
 done
